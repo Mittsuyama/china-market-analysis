@@ -1,0 +1,4 @@
+./static/report/
+.DS_Store
+./vscode/
+./src/node_modules/
