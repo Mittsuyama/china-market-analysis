@@ -35,7 +35,7 @@ const keyNames = [
   '-',
 ];
 
-export const updateAllStocksGeneralData = async () => {
+const fetchAllStockGeneralData = async (): Promise<StockInfo[]> => {
   const res = await get({
     url: 'http://82.push2.eastmoney.com/api/qt/clist/get',
     body: {
@@ -56,11 +56,25 @@ export const updateAllStocksGeneralData = async () => {
   const stocks = list.map((item, listIndex) => {
     return Object.fromEntries([['序号', listIndex]].concat(Object.entries(item).map((arr, index) => [keyNames[index], arr[1]])));
   });
+  return stocks;
+};
+
+export const updateAllStocksGeneralData = async () => {
+  const stocks = await fetchAllStockGeneralData();
   Deno.writeTextFileSync('./static/general.json', JSON.stringify(stocks));
 };
 
-export const getAllStocksGeneralData = (): StockInfo[] => {
-  const stockList = JSON.parse(Deno.readTextFileSync('./static/general.json')) as StockInfo[];
+interface GetAllStocksGeneralDataParams {
+  useCache?: boolean;
+}
+
+export const getAllStocksGeneralData = async (params: GetAllStocksGeneralDataParams): Promise<StockInfo[]> => {
+  let stockList;
+  if (params.useCache) {
+    stockList = JSON.parse(Deno.readTextFileSync('./static/general.json')) as StockInfo[];
+  } else {
+    stockList = await fetchAllStockGeneralData();
+  }
 
   return stockList.map((item) => {
     const unusableCode = item['代码'].toString();

@@ -12,7 +12,7 @@ interface BundleRequestParams {
 export const bundleRequest = async (params: BundleRequestParams) => {
   const { fetch, bundleSize = 50, start = 0, dir } = params;
 
-  const stocks = getAllStocksGeneralData();
+  const stocks = await getAllStocksGeneralData({ useCache: true });
 
   for (let index = start; index < stocks.length; index += bundleSize) {
     await Promise.all(Array.from({ length: bundleSize }, async (_, j) => {
