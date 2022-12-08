@@ -2,6 +2,6 @@ static/report
 
 .DS_Store
 
-vscode
+.vscode
 
 src/node_modules
