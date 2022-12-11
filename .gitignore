@@ -5,3 +5,6 @@ static/report
 .vscode
 
 src/node_modules
+
+Python/.idea
+Python/static

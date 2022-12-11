@@ -16,7 +16,7 @@ export const requestUrlFromGet = (params: Get) => {
           const encodedArray = window.encodeURIComponent(value.join(','));
           return `${key}=${encodedArray}`;
         } else {
-          return `${key}=${value}`;
+          return `${key}=${encodeURIComponent(value)}`;
         }
       })
       .join('&')
