@@ -9,19 +9,25 @@ import pandas as pd
 # pandas 显示所有列
 pd.set_option('display.max_columns', None)
 
+# 沪深 300
+code_hu_shen_300 = 'sh000300'
 # 申万一级行业实时数据
 sw_index_first_info_df = "sw_index_first_info_df"
 # A 股市盈率
 stock_a_ttm_lyr = "stock_a_ttm_lyr"
 # 中美国债收益率
 bond_zh_us_rate = "bond_zh_us_rate"
+# 风格指数历史行情
+index_style_index_hist_sw = "index_style_index_hist_sw"
+# 实时指数行情数据
+stock_zh_index_spot = "stock_zh_index_spot"
 
 
 def _get_data_file_path(path):
     return os.path.join(os.path.dirname(__file__), 'static', path)
 
 
-def get_akshare_data_with_name(name):
+def _get_akshare_data_with_name(name, *args):
     # gen meta and data file path
     data_file_path = _get_data_file_path(name + '.csv')
     meta_file_path = _get_data_file_path('meta.csv')
@@ -35,7 +41,7 @@ def get_akshare_data_with_name(name):
     last_update_time = meta['last_update_time'][name]
     # do not use cache and request online resource again
     if today != last_update_time or os.path.exists(data_file_path) is False:
-        data = getattr(ak, name)()
+        data = getattr(ak, name)() if args == () else getattr(ak, name)(args)
         data.to_csv(data_file_path)
         meta['last_update_time'][name] = today
         meta.to_csv(meta_file_path)
@@ -47,7 +53,7 @@ def get_akshare_data_with_name(name):
 # 国债收益率
 def get_bound_rate():
     name = '中国国债收益率10年'
-    origin_data = get_akshare_data_with_name(bond_zh_us_rate)[['日期', name]]
+    origin_data = _get_akshare_data_with_name(bond_zh_us_rate)[['日期', name]]
     valid_data = origin_data[origin_data.apply(lambda x: math.isnan(x[name]) is False, axis=1)]
     valid_data.columns = ['date', 'rate']
     return pd.DataFrame(valid_data)
@@ -56,7 +62,7 @@ def get_bound_rate():
 # 滚动市盈率中位数
 def get_middle_pe_ttm():
     name = 'middlePETTM'
-    origin_data = get_akshare_data_with_name(stock_a_ttm_lyr)[['date', name]]
+    origin_data = _get_akshare_data_with_name(stock_a_ttm_lyr)[['date', name]]
     origin_data.columns = ['date', 'pe']
     return pd.DataFrame(origin_data)
 
@@ -64,9 +70,19 @@ def get_middle_pe_ttm():
 # 滚动市盈率等权平均值
 def get_average_pe_ttm():
     name = 'averagePETTM'
-    origin_data = get_akshare_data_with_name(stock_a_ttm_lyr)[['date', name]]
+    origin_data = _get_akshare_data_with_name(stock_a_ttm_lyr)[['date', name]]
     origin_data.columns = ['date', 'pe']
     return pd.DataFrame(origin_data)
+
+
+# 实时指数行情数据
+def get_stock_zh_index_spot():
+    return _get_akshare_data_with_name(stock_zh_index_spot)
+
+
+# 沪深 300 历史数据
+def get_hu_shen_300_hist():
+    return
 
 
 # 近五年 FED

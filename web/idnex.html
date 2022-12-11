@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>China Market Analysis</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.1/echarts.min.js"></script>
+  <style>
+    .chart-wrap {
+      width: 100%;
+      height: 700px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-wrap" id="fed"></div>
+</body>
+<script>
+  $.getJSON("./data/fed.json", function(data) {
+    const fed_chart = echarts.init(document.getElementById('fed'));
+    const sort_fed = data.map(item => item.fed).sort((a, b) => a - b);
+    const per_25 = sort_fed[Math.floor(sort_fed.length / 4)];
+    const per_50 = sort_fed[Math.floor(sort_fed.length / 2)];
+    const per_75 = sort_fed[Math.floor(sort_fed.length / 4 * 3)];
+    console.log(per_25, per_50, per_75);
+    fed_chart.setOption({
+      title: {
+          text: '五年 FED',
+        },
+        tooltip: {
+          trigger: 'axis',
+        },
+        grid: {
+          left: '5%',
+          right: '15%',
+          bottom: '10%'
+        },
+        legend: {
+          data: ['FED'],
+        },
+        toolbox: {
+          right: 10,
+          feature: {
+            dataZoom: {
+              yAxisIndex: 'none'
+            },
+            restore: {},
+            saveAsImage: {}
+          }
+        },
+        visualMap: {
+          top: 50,
+          right: 10,
+          precision: 2,
+          pieces: [
+            {
+              lte: per_25,
+              color: 'rgb(45,166,65)',
+            },
+            {
+              gt: per_25,
+              lte: per_50,
+              color: 'rgb(199,229,139)',
+            },
+            {
+              gt: per_50,
+              lte: per_75,
+              color: 'rgb(251,193,78)',
+            },
+            {
+              gt: per_75,
+              color: 'rgb(212,0,0)',
+            },
+          ],
+        },
+        xAxis: {
+          data: data.map(item => item.date),
+          axisLine: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          splitLine: {
+            show: false
+          },
+        },
+        yAxis: {
+          splitLine: {
+            show: false,
+          },
+        },
+        series: [
+          {
+            name: 'FED',
+            type: 'line',
+            data: data.map(item => item.fed),
+            markLine: {
+              silent: true,
+              lineStyle: {
+                color: 'rgba(0, 0, 0, .5)',
+                type: 'dashed',
+              },
+              data: [
+                {
+                  yAxis: per_25,
+                },
+                {
+                  yAxis: per_50,
+                },
+                {
+                  yAxis: per_75,
+                },
+              ]
+            },
+          }
+        ]
+    })
+  });
+</script>
+</html>
